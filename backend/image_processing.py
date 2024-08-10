@@ -4,19 +4,17 @@ from torchvision import models, transforms
 from torchvision.utils import save_image
 from PIL import Image
 
-
+# Define image transformations
 image_size = 224
 loader = transforms.Compose([
     transforms.Resize((image_size, image_size)),
     transforms.ToTensor(),
 ])
 
-
 def load_image(image_path):
     image = Image.open(image_path)
     image = loader(image).unsqueeze(0)
     return image.to(torch.device("cuda" if torch.cuda.is_available() else "cpu"), torch.float)
-
 
 class VGG(nn.Module):
     def __init__(self):
@@ -32,10 +30,8 @@ class VGG(nn.Module):
                 features.append(x)
         return features
 
-
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = VGG().to(device).eval()
-
 
 def perform_style_transfer(content_img, style_img, total_steps=2000, alpha=1e5, beta=1e10):
     optimizer = optim.Adam([content_img.requires_grad_()], lr=0.003)
@@ -64,19 +60,7 @@ def perform_style_transfer(content_img, style_img, total_steps=2000, alpha=1e5, 
         total_loss.backward()
         optimizer.step()
 
-        # if step % 200 == 0:
-        #     print(f'Step {step}: Total Loss: {total_loss.item()}')
-        #     save_image(generated, f"generated_img_at_step_{step}.png")
-        #
-        # if step % 500 == 0:
-        #     imshow(generated)
-
-    return generated
-
-
-def imshow(tensor):
-    image = tensor.clone().detach().cpu()
-    image = image.squeeze(0)
-    unloader = transforms.ToPILImage()
-    image = unloader(image)
-    image.show()
+    # Save the generated image
+    output_image_path = "generated_image.png"
+    save_image(generated, output_image_path)
+    return output_image_path
