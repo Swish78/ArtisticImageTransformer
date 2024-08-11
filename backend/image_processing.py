@@ -11,10 +11,12 @@ loader = transforms.Compose([
     transforms.ToTensor(),
 ])
 
+
 def load_image(image_path):
     image = Image.open(image_path)
     image = loader(image).unsqueeze(0)
     return image.to(torch.device("cuda" if torch.cuda.is_available() else "cpu"), torch.float)
+
 
 class VGG(nn.Module):
     def __init__(self):
@@ -30,8 +32,10 @@ class VGG(nn.Module):
                 features.append(x)
         return features
 
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = VGG().to(device).eval()
+
 
 def perform_style_transfer(content_img, style_img, total_steps=2000, alpha=1e5, beta=1e10):
     optimizer = optim.Adam([content_img.requires_grad_()], lr=0.003)
